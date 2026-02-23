@@ -1,8 +1,10 @@
 import React from 'react';
 import './App.css';
 import {QueryClient, QueryClientProvider, useQuery} from "@tanstack/react-query";
-import {fetchSchedule} from './utilities/times.jsx';
+//import {fetchSchedule} from './utilities/times.jsx';
 import {CourseList} from './components/CourseList.jsx';
+import { useData } from './utilities/firebase.jsx';
+import { addScheduleTimes } from './utilities/times.jsx';
 
 const Banner = ({ title }) => 
 (
@@ -11,19 +13,15 @@ const Banner = ({ title }) =>
 
 const Main = () => 
 {
-  const { data, isLoading, error } = useQuery( 
-    {
-      queryKey: ['schedule'],
-      queryFn: fetchSchedule
-    });
+  const [schedule, loading, error] = useData('/', addScheduleTimes);
 
   if (error) return <h1>Error al cargar schedule</h1>;
-  if (isLoading) return <h1>Cargando schedule...</h1>;
+  if (loading) return <h1>Cargando schedule...</h1>;
 
-  return(
+  return (
     <div className="container">
-      <Banner title={ data.title } />
-      <CourseList courses={ data.courses } />
+      <Banner title={schedule.title} />
+      <CourseList courses={schedule.courses} />
     </div>
   );
 };
@@ -32,6 +30,7 @@ const queryClient = new QueryClient();
 
 const App = () => 
 (
+  
   <QueryClientProvider client={queryClient}>
     <Main />
   </QueryClientProvider>
