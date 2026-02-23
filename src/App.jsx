@@ -18,17 +18,36 @@ const Banner = ({ title }) =>
   <h1>{ title }</h1>
 );
 
-//Función sin usar
+const TermButton = ({term}) => (
+  <>
+    <input type="radio" id={term} className="btn-check" autoComplete="off" />
+    <label class="btn btn-success m-1 p-2" htmlFor={term}>
+    { term }
+    </label>
+  </>
+);
+
+const TermSelector = () => (
+  <div className="btn-group">
+  { 
+    Object.values(terms)
+      .map(value => <TermButton key={value} term={value} />)
+  }
+  </div>
+);
+
+//Funciónes sin usar
+//=============================================================
 const getCourseTerm = course => 
 (
   terms[course.id.charAt(0)]
 );
 
-//Función sin usar
 const getCourseNumber = course => 
 (
   course.id.slice(1, 4)
 );
+//=============================================================
 
 const Course = ({ course }) => 
 (
@@ -55,17 +74,20 @@ const Course = ({ course }) =>
 
 const CourseList = ({ courses }) => 
 (
-  <div className="course-list">
-    {
-      Object.entries(courses).map
-      (
-        ([id, course]) => 
+  <>
+    <TermSelector />
+    <div className="course-list">
+      {
+        Object.entries(courses).map
         (
-          <Course key={id} course={{ ...course, id }}/>
+          ([id, course]) => 
+          (
+            <Course key={id} course={{ ...course, id }}/>
+          )
         )
-      )
-    }
-  </div>
+      }
+    </div>
+  </>
 );
 
 // Esto no se ocupa ya, solo sirvió de forma local.
