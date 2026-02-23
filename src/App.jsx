@@ -1,16 +1,17 @@
 import React from 'react';
 import './App.css';
 import { QueryClient, QueryClientProvider, useQuery } from "@tanstack/react-query";
+import { useState } from 'react';
 
-
-const fetchSchedule = async () => {
+const fetchSchedule = async () => 
+{
   const url = 'https://courses.cs.northwestern.edu/394/guides/data/cs-courses.php';
   const response = await fetch(url);
   if (!response.ok) throw response;
   return await response.json();
 };
 
-const terms = { F: 'Fall', W: 'Winter', S: 'Spring'};
+const terms = { A:"All", F: 'Fall', W: 'Winter', S: 'Spring'};
 
 
 const Banner = ({ title }) => 
@@ -18,35 +19,42 @@ const Banner = ({ title }) =>
   <h1>{ title }</h1>
 );
 
-const TermButton = ({term}) => (
+const TermButton = ({term, setTerm, checked}) => 
+(
   <>
-    <input type="radio" id={term} className="btn-check" autoComplete="off" />
+    <input type="radio" id={term} className="btn-check" checked={checked} autoComplete="off"
+      onChange={() => setTerm(term)} />
     <label class="btn btn-success m-1 p-2" htmlFor={term}>
-    { term }
+      { term }
     </label>
   </>
 );
 
-const TermSelector = () => (
+const TermSelector = ({term, setTerm}) => 
+(
   <div className="btn-group">
   { 
-    Object.values(terms)
-      .map(value => <TermButton key={value} term={value} />)
+    Object.values(terms).map
+    (value => 
+      (
+        <TermButton key={value} term={value} setTerm={setTerm} checked={value === term} />
+      )
+    )
   }
   </div>
 );
 
 //Funciónes sin usar
 //=============================================================
-const getCourseTerm = course => 
-(
-  terms[course.id.charAt(0)]
-);
+// const getCourseTerm = course => 
+// (
+//   terms[course.id.charAt(0)]
+// );
 
-const getCourseNumber = course => 
-(
-  course.id.slice(1, 4)
-);
+// const getCourseNumber = course => 
+// (
+//   course.id.slice(1, 4)
+// );
 //=============================================================
 
 const Course = ({ course }) => 
@@ -72,23 +80,22 @@ const Course = ({ course }) =>
   </div>
 );
 
-const CourseList = ({ courses }) => 
-(
-  <>
-    <TermSelector />
-    <div className="course-list">
-      {
-        Object.entries(courses).map
-        (
-          ([id, course]) => 
-          (
-            <Course key={id} course={{ ...course, id }}/>
-          )
-        )
-      }
-    </div>
-  </>
-);
+const CourseList = ({ courses }) =>
+{
+  const [term, setTerm] = useState('Fall');
+  const termCourses = Object.values(courses).filter(course => term === "All" || term === course.term);
+  
+  return(
+    <>
+      <TermSelector term={term} setTerm={setTerm} />
+      <div className="course-list">
+      { termCourses.map(course => <Course key={course.id} course={ course } />) }
+      </div>
+    </>
+  );
+};
+
+
 
 // Esto no se ocupa ya, solo sirvió de forma local.
 
@@ -143,7 +150,8 @@ const CourseList = ({ courses }) =>
 //   </div>
 // );
 
-const Main = () => {
+const Main = () => 
+{
   const { data, isLoading, error } = useQuery( 
     {
       queryKey: ['schedule'],
@@ -163,12 +171,11 @@ const Main = () => {
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => 
+(
   <QueryClientProvider client={queryClient}>
     <Main />
   </QueryClientProvider>
 );
-
-
 
 export default App;
