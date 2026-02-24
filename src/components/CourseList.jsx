@@ -1,5 +1,7 @@
 import { useState } from 'react';
 import { Course } from './Course.jsx';
+import { signInWithGoogle, signOut, useUserState } from '../utilities/firebase.jsx';
+
 
 export const terms = { A:"All", F: 'Fall', W: 'Winter', S: 'Spring'};
 export const TermButton = ({term, setTerm, checked}) => 
@@ -13,26 +15,48 @@ export const TermButton = ({term, setTerm, checked}) =>
   </>
 );
 
-export const TermSelector = ({term, setTerm}) => 
-(
-  <div className="btn-group">
-  { 
-    Object.values(terms).map
-    (value => 
-      (
-        <TermButton key={value} term={value} setTerm={setTerm} checked={value === term} />
-      )
-    )
-  }
-  </div>
+const SignInButton = () => (
+  <button className="btn btn-secondary btn-sm"
+      onClick={() => signInWithGoogle()}>
+    Sign In
+  </button>
 );
 
+const SignOutButton = () => (
+  <button className="btn btn-secondary btn-sm"
+      onClick={() => signOut()}>
+    Sign Out
+  </button>
+);
+
+export const TermSelector = ({term, setTerm}) => 
+{
+    const [user] = useUserState();
+    return(
+        <div className="btn-toolbar justify-content-between">
+                <div className="btn-group">
+                    { 
+                        Object.values(terms).map
+                        (value => 
+                            (
+                                <TermButton key={value} term={value} setTerm={setTerm} checked={value === term} />
+                            )
+                        )
+                    }
+                </div>
+            { user ? <SignOutButton /> : <SignInButton /> }
+        </div>
+    );
+}
 export const CourseList = ({ courses }) =>
 {
   const [term, setTerm] = useState('Fall');
-  const termCourses = Object.values(courses).filter(course => term === "All" || term === course.term);
   const [selected, setSelected] = useState([]);
-  
+  const termCourses = Object.values(courses).filter(course => term === "All" || term === course.term);
+
+  if (selected.some(course => course !== courses[course.id])) {
+    setSelected([])
+  };
 
   return(
     <>

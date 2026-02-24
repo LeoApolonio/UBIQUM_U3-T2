@@ -2,6 +2,12 @@
 import { initializeApp } from "firebase/app";
 import { getDatabase, onValue, ref, set } from 'firebase/database';
 import { useObject } from "react-firebase-hooks/database";
+import { getAuth, GoogleAuthProvider, signInWithPopup, signOut } from 'firebase/auth';
+import { useAuthState } from 'react-firebase-hooks/auth';
+
+export const signInWithGoogle = () => {
+  signInWithPopup(auth, new GoogleAuthProvider());
+};
 
 export const useData = (path, transform) => {
   const [snapshot, loading, error] = useObject(ref(database, path));
@@ -31,4 +37,13 @@ const firebaseConfig = {
 
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
 const database = getDatabase(app);
+
+export const setData = (path, value) => (
+  set(ref(database, path), value)
+);
+
+export const signOutUser = () => signOut(auth);
+export { signOutUser as signOut };
+export const useUserState = () => useAuthState(auth);

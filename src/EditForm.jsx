@@ -1,6 +1,7 @@
 import { useLocation } from "react-router-dom";
 import { useForm } from './useForm.jsx';
 import { timeParts } from "./utilities/times.jsx";
+import { setData } from './utilities/firebase.jsx';
 
 const isValidMeets = (meets) => {
   const parts = timeParts(meets);
@@ -15,7 +16,15 @@ const validateCourseData = (key, val) => {
   }
 };
 
-const submit = (values) => alert(JSON.stringify(values));
+const submit = async (values) => {
+  if (window.confirm(`Change ${values.id} to ${values.title}: ${values.meets}`)) {
+    try {
+      await setData(`courses/${values.id}/`, values);
+    } catch (error) {
+      alert(error);
+    }
+  }
+};
 
 const EditForm = () => {
   const { state: course } = useLocation();
